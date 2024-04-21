@@ -1,5 +1,10 @@
 "use client";
 
+/*
+	File: src/app/auth/signup/page.tsx
+	Description: This page displays the signup form.
+*/
+
 import React, { useState } from "react";
 import axios from "axios";
 import { validateEmail, validatePassword, validatePhone } from "../validations";
@@ -143,18 +148,21 @@ const SignupForm: React.FC = () => {
 					className="TextButton peer relative inline-flex items-center whitespace-nowrap underline-offset-4 transition-colors duration-300 focus-visible:underline focus-visible:outline-none disabled:pointer-events-none items-center"
 					type="button"
 					onClick={() => router.push("/login")}>
-					<React.Fragment>
-						<p className="text-gray-900 font-medium text-md underline-offset-4 hover:underline peer-hover:underline">Log in</p>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 256 256"
-							fill="currentColor"
-							className="arrow-up-right fill-gray-900 ml-1  flex-shrink-0"
-							width="20"
-							height="20">
-							<path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"></path>
-						</svg>
-					</React.Fragment>
+					<p className="text-gray-900 font-medium text-md underline-offset-4 hover:underline peer-hover:underline">
+						Log in &nbsp;
+					</p>
+					<svg
+						className="h-8 w-8 text-gray-500"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round">
+						<circle cx="12" cy="12" r="10" />
+						<polyline points="12 16 16 12 12 8" />
+						<line x1="8" y1="12" x2="16" y2="12" />
+					</svg>
 				</button>
 			</div>
 
