@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Quickly Code Challenge
 
-## Getting Started
+## Access the hosted application
 
-First, run the development server:
+The application is also hosted on the internet and can be accessed at [quickly.anantshukla.com](quickly.anantshukla.com)
+
+## How to execute the code locally
+
+You can run the development server using:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev or yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This is a Next.js project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## About
 
-## Learn More
+The application has three pages:
 
-To learn more about Next.js, take a look at the following resources:
+-   Login: /login
+-   Sign up: /signup
+-   Profile: /myprofile
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Login Page
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Login has a form with two fields: email and password. The form is submitted to the `/auth/login` endpoint. If the user is authenticated, they are navigated to the profile page. If the user is not authenticated, they are shown an error message.
 
-## Deploy on Vercel
+## Sign up Page
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The sign up page has a form with multiple fields. Some of the fields are required, and some are optional. The form is submitted to the `/auth/signup` endpoint. If the user is successfully signed up, they are navigated to the login page. Else, if there is an error in signing up, they are shown an error message.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Profile Page
+
+Profile is a protected route, meaning that the user must be authenticated to access it. It picks up the user's information from the API `/auth/login` endpoint and displays it.
+If the user is not authenticated, they will be navigated to the login page.
+
+The page has an option to view the data in plain text that is fetched from the API or in JSON format. This can be toggled by clicking the toggle button.

@@ -9,12 +9,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import { validateEmail, validatePassword } from "../validations";
 import AuthLayout from "../authLayout";
-import { useRouter } from "next/navigation";
 import { APIErrorFailureDTO } from "@/app/lib/APIErrorFailureDTO";
 import { toast } from "react-toastify";
+import { NextRouterWrapper } from "@/app/lib/NextRouterWrapper";
 
 const LoginForm: React.FC = () => {
-	const router = useRouter();
+	const router = NextRouterWrapper.getAppRouter();
+
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -68,7 +69,7 @@ const LoginForm: React.FC = () => {
 				},
 			},
 			error: {
-				render({ data }: { data: any }) {
+				render({ data }: { data: APIErrorFailureDTO }) {
 					console.log(data);
 					const { message } = data.response.data;
 					return `${message}`;
@@ -109,7 +110,7 @@ const LoginForm: React.FC = () => {
 					<div className="TextInput relative w-full max-w-full">
 						<input
 							id="Work email"
-							type="email"
+							type="text"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"

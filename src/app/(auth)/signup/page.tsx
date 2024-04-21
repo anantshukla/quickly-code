@@ -11,10 +11,12 @@ import { validateEmail, validatePassword, validatePhone } from "../validations";
 import AuthLayout from "../authLayout";
 import { APIErrorFailureDTO } from "@/app/lib/APIErrorFailureDTO";
 import RadioWithTickMark from "@/app/lib/RadioWithTickMark";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { NextRouterWrapper } from "@/app/lib/NextRouterWrapper";
 
 const SignupForm: React.FC = () => {
+	const router = NextRouterWrapper.getAppRouter();
+
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [email, setEmail] = useState("");
@@ -130,7 +132,7 @@ const SignupForm: React.FC = () => {
 				},
 			},
 			error: {
-				render({ data }: { data: any }) {
+				render({ data }: { data: APIErrorFailureDTO }) {
 					console.log(data);
 					const { message } = data.response.data;
 					return `${message}`;
@@ -138,8 +140,6 @@ const SignupForm: React.FC = () => {
 			},
 		});
 	};
-
-	const router = useRouter();
 
 	return (
 		<AuthLayout>

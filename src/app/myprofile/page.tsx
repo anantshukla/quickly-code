@@ -8,13 +8,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import { ProfileDTO } from "@/app/lib/ProfileDTO";
 import { filterNullAndEmptyStrings, sortFields } from "@/app/lib/utils";
 import Head from "next/head";
+import { NextRouterWrapper } from "../lib/NextRouterWrapper";
 
 const page: React.FC = () => {
-	const router = useRouter();
+	const router = NextRouterWrapper.getAppRouter();
 
 	const [jwtToken, setJwtToken] = useState("");
 	const [showJsonView, setShowJsonView] = useState(false);

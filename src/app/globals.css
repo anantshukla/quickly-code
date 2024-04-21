@@ -31,11 +31,11 @@ img {
 	display: block;
 }
 
-.container {
+/* .container {
 	max-width: 36rem;
 	padding: 0 1rem;
 	margin: 3rem auto;
-}
+} */
 
 @layer base {
 	input[type="number"]::-webkit-inner-spin-button,
