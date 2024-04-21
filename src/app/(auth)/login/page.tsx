@@ -34,8 +34,6 @@ const LoginForm: React.FC = () => {
 	const [errors, setErrors] = useState<FormErrors>({});
 
 	useEffect(() => {
-		console.log(signInFormData);
-		console.log(errors);
 		if (isSubmittedOnce) {
 			isSignInFormValid();
 		}

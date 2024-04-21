@@ -251,7 +251,7 @@ const SignupForm: React.FC = () => {
 				<div className="TextInput relative w-full max-w-full">
 					<input
 						id="Work email (required)"
-						type="email"
+						type="text"
 						name="email"
 						value={signupFormData.email}
 						onChange={handleChange}

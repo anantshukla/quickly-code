@@ -20,7 +20,19 @@ const page: React.FC = () => {
 	const [showJsonView, setShowJsonView] = useState(false);
 	const [userDetails, setUserDetails] = useState<ProfileDTO | null>(null);
 
-	const getTokenFromSessionStorage = () => {
+	// Default useEffect to check if user is logged in
+	useEffect(() => {
+		getTokenFromSessionStorage();
+	}, []);
+
+	// Only call this useEffect when jwtToken is updated by getTokenFromSessionStorage
+	useEffect(() => {
+		if (jwtToken && jwtToken !== "") {
+			fetchUserProfileDetails(jwtToken);
+		}
+	}, [jwtToken]);
+
+	const getTokenFromSessionStorage = (): void => {
 		const tokenFromStorage = window.sessionStorage.getItem("jwt_bearer_token");
 
 		if (!tokenFromStorage || tokenFromStorage === "") {
@@ -31,7 +43,7 @@ const page: React.FC = () => {
 		}
 	};
 
-	const fetchUserProfileDetails = async (tokenValue: string) => {
+	const fetchUserProfileDetails = async (tokenValue: string): Promise<void> => {
 		const userAPIDetails = await axios
 			.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/user`, {
 				headers: {
@@ -46,22 +58,27 @@ const page: React.FC = () => {
 			})
 			.catch((error) => {
 				console.log(error);
-				toast.error("An error occurred while fetching user details. Please try again later.");
+				if (error.response && error.response.status === 401) {
+					toast.error("Authorization error. Please login again.");
+					logoutFromApp();
+				} else {
+					toast.error("An error occurred while fetching user details. Please try again later.");
+				}
 			});
 		return userAPIDetails;
 	};
 
-	const logoutFromApp = () => {
+	const logoutFromApp = (): void => {
 		window.sessionStorage.removeItem("jwt_bearer_token");
 		setJwtToken("");
 		router.push("/login");
 	};
 
-	const toggleJsonView = () => {
+	const toggleJsonView = (): void => {
 		setShowJsonView(!showJsonView);
 	};
 
-	const renderUserDetails = () => {
+	const renderUserDetails = (): React.ReactNode => {
 		const filteredDetails = filterNullAndEmptyStrings(userDetails);
 		if (showJsonView) {
 			return <pre>{JSON.stringify(filteredDetails, null, 2)}</pre>;
@@ -113,7 +130,7 @@ const page: React.FC = () => {
 							</div>
 							<hr className="my-8" />
 							<div>
-								<h3 className="text-lg font-bold mb-4">Other Users in Company</h3>
+								<h3 className="text-lg font-bold mb-4">Registered Users in Company</h3>
 								{userDetails.Company.Users.map((user) => (
 									<div key={user.id} className="flex text-gray-600 mb-2">
 										<p className="font-bold flex text-gray-600 mb-2">{user.full_name}: </p>
@@ -127,18 +144,6 @@ const page: React.FC = () => {
 			);
 		}
 	};
-
-	// Default useEffect to check if user is logged in
-	useEffect(() => {
-		getTokenFromSessionStorage();
-	}, []);
-
-	// Only call this useEffect when jwtToken is updated by getTokenFromSessionStorage
-	useEffect(() => {
-		if (jwtToken && jwtToken !== "") {
-			fetchUserProfileDetails(jwtToken);
-		}
-	}, [jwtToken]);
 
 	return (
 		<div className="bg-gray-100 min-h-screen">
