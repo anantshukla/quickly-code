@@ -5,107 +5,154 @@
 	Description: This page displays the signup form.
 */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { validateEmail, validatePassword, validatePhone } from "../validations";
 import AuthLayout from "../authLayout";
 import { APIErrorFailureDTO } from "@/app/lib/APIErrorFailureDTO";
 import RadioWithTickMark from "@/app/lib/RadioWithTickMark";
-import { useRouter } from "next/navigation";
+import { SignupApiDto } from "@/app/lib/SignupApiDto";
 import { toast } from "react-toastify";
+import { NextRouterWrapper } from "@/app/lib/NextRouterWrapper";
+
+interface SignUpFormDataSchema {
+	firstName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	confirmPassword: string;
+	businessRegistrationType: string;
+	companyType: string;
+	legalName: string;
+	hasTradeName: boolean;
+	operatingName: string;
+	industry: string;
+	website: string;
+	phone: string;
+	businessNumber: string;
+	expectedActivity: string;
+}
+
+interface FormErrors {
+	[key: string]: string;
+}
 
 const SignupForm: React.FC = () => {
-	const [firstName, setFirstName] = useState("");
-	const [lastName, setLastName] = useState("");
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [confirmPassword, setConfirmPassword] = useState("");
-	const [businessRegistrationType, setBusinessRegistrationType] = useState("");
+	const router = NextRouterWrapper.getAppRouter();
 
-	const [companyType, setCompanyType] = useState("");
+	const [signupFormData, setSignupFormData] = useState<SignUpFormDataSchema>({
+		firstName: "",
+		lastName: "",
+		email: "",
+		password: "",
+		confirmPassword: "",
+		businessRegistrationType: "",
+		companyType: "",
+		legalName: "",
+		hasTradeName: false,
+		operatingName: "",
+		industry: "",
+		website: "",
+		phone: "",
+		businessNumber: "",
+		expectedActivity: "",
+	});
+	const [isSubmittedOnce, setIsSubmittedOnce] = useState(false);
+	const [errors, setErrors] = useState<FormErrors>({});
 
-	const [legalName, setLegalName] = useState("");
-	const [hasTradeName, setHasTradeName] = useState(false);
-	const [operatingName, setOperatingName] = useState("");
-	const [industry, setIndustry] = useState("");
+	useEffect(() => {
+		if (isSubmittedOnce) {
+			isSignUpFormValid();
+		}
+	}, [signupFormData]);
 
-	const [website, setWebsite] = useState("");
-	const [phone, setPhone] = useState("");
-	const [businessNumber, setBusinessNumber] = useState("");
-	const [expectedActivity, setExpectedActivity] = useState("");
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | EventTarget>): void => {
+		const { name, value, type, checked } = e.target as any;
+		setSignupFormData((prevData) => ({
+			...prevData,
+			[name]: type === "checkbox" ? checked : value,
+		}));
+	};
 
-	const [errors, setErrors] = useState<{ [key: string]: string }>({});
+	const isSignUpFormValid = (): boolean => {
+		const validationErrors: FormErrors = {};
+		setErrors(validationErrors);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		let validationErrors: { [key: string]: string } = {};
-
-		if (!firstName) {
+		if (!signupFormData.firstName) {
 			validationErrors.firstName = "First Name is required";
 		}
-		if (!lastName) {
+		if (!signupFormData.lastName) {
 			validationErrors.lastName = "Last Name is required";
 		}
-		if (!email || !validateEmail(email)) {
+		if (!signupFormData.email || !validateEmail(signupFormData.email)) {
 			validationErrors.email = "Please enter a valid email address";
 		}
-		if (!password || !validatePassword(password)) {
+		if (!signupFormData.password || !validatePassword(signupFormData.password)) {
 			validationErrors.password = "Password should be at least 6 characters long";
 		}
-		if (password !== confirmPassword) {
+		if (signupFormData.password !== signupFormData.confirmPassword) {
 			validationErrors.confirmPassword = "The passwords do not match";
 		}
-		if (!businessRegistrationType) {
+		if (!signupFormData.businessRegistrationType) {
 			validationErrors.businessRegistrationType = "Business registration type is required";
 		}
-		if (!legalName) {
+		if (!signupFormData.legalName) {
 			validationErrors.legalName = "Legal name is required";
 		}
-		if (!companyType) {
+		if (!signupFormData.companyType) {
 			validationErrors.companyType = "Company type is required";
 		}
-		if (!industry) {
+		if (!signupFormData.industry) {
 			validationErrors.industry = "Industry is required";
 		}
-		if (expectedActivity === "") {
+		if (signupFormData.expectedActivity === "") {
 			validationErrors.expectedActivity = "Expected activity is required";
 		}
-		if (phone && !validatePhone(phone)) {
+		if (signupFormData.phone && !validatePhone(signupFormData.phone)) {
 			validationErrors.phone = "Please enter a valid phone number";
 		}
 
 		setErrors(validationErrors);
 
 		if (Object.keys(validationErrors).length > 0) {
+			return false;
+		}
+		return true;
+	};
+
+	const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+		e.preventDefault();
+		setIsSubmittedOnce(true);
+
+		if (!isSignUpFormValid()) {
 			return;
 		}
 
-		const requestBody = {
+		const requestBody: SignupApiDto = {
 			user: {
-				first_name: firstName,
-				last_name: lastName,
-				email: email,
-				password: password,
+				first_name: signupFormData.firstName,
+				last_name: signupFormData.lastName,
+				email: signupFormData.email,
+				password: signupFormData.password,
 			},
 			company: {
 				activity: {
 					early_pay_intent: true,
-					expected_activity: expectedActivity,
+					expected_activity: signupFormData.expectedActivity,
 				},
 				early_pay_intent: true,
-				industry: { value: industry, label: industry },
+				industry: { value: signupFormData.industry, label: signupFormData.industry },
 				business_type: {
-					label: companyType,
-					value: companyType,
+					label: signupFormData.companyType,
+					value: signupFormData.companyType,
 				},
-				website: website,
-				business_registration: businessRegistrationType,
-				phone: phone,
-				business_number: businessNumber,
-				has_trade_name: hasTradeName,
-				legal_name: legalName,
-				expected_activity: expectedActivity,
+				website: signupFormData.website,
+				business_registration: signupFormData.businessRegistrationType,
+				phone: signupFormData.phone,
+				business_number: signupFormData.businessNumber,
+				has_trade_name: signupFormData.hasTradeName,
+				legal_name: signupFormData.legalName,
+				expected_activity: signupFormData.expectedActivity,
 			},
 		};
 
@@ -123,23 +170,19 @@ const SignupForm: React.FC = () => {
 			},
 			success: {
 				render({ data }: { data: any }) {
-					console.log(data.data);
 					const { message } = data.data;
 					router.push("/login");
 					return `${message} Please Login to continue.`;
 				},
 			},
 			error: {
-				render({ data }: { data: any }) {
-					console.log(data);
+				render({ data }: { data: APIErrorFailureDTO }) {
 					const { message } = data.response.data;
 					return `${message}`;
 				},
 			},
 		});
 	};
-
-	const router = useRouter();
 
 	return (
 		<AuthLayout>
@@ -174,8 +217,9 @@ const SignupForm: React.FC = () => {
 						<input
 							id="First name"
 							type="text"
-							value={firstName}
-							onChange={(e) => setFirstName(e.target.value)}
+							name="firstName"
+							value={signupFormData.firstName}
+							onChange={handleChange}
 							className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 							placeholder="First name"
 						/>
@@ -190,8 +234,9 @@ const SignupForm: React.FC = () => {
 						<input
 							id="Last name"
 							type="text"
-							value={lastName}
-							onChange={(e) => setLastName(e.target.value)}
+							name="lastName"
+							value={signupFormData.lastName}
+							onChange={handleChange}
 							className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 							placeholder="Last name"
 						/>
@@ -207,8 +252,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Work email (required)"
 						type="email"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						name="email"
+						value={signupFormData.email}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Work email (required)"
 					/>
@@ -223,8 +269,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Password"
 						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						name="password"
+						value={signupFormData.password}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Password (required)"
 					/>
@@ -243,8 +290,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Confirm Password"
 						type="password"
-						value={confirmPassword}
-						onChange={(e) => setConfirmPassword(e.target.value)}
+						name="confirmPassword"
+						value={signupFormData.confirmPassword}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Confirm Password (required)"
 					/>
@@ -265,13 +313,14 @@ const SignupForm: React.FC = () => {
 							{ id: "soleProprietor", value: "Sole Proprietor", label: "Sole Proprietor" },
 							{ id: "corporation", value: "Corporation", label: "Corporation" },
 						]}
-						selectedValue={businessRegistrationType}
-						onChange={(value) => setBusinessRegistrationType(value)}
+						name="businessRegistrationType"
+						selectedValue={signupFormData.businessRegistrationType}
+						onChange={handleChange}
 					/>
 
 					{errors.businessRegistrationType && <div className="text-sm text-red-500">{errors.businessRegistrationType}</div>}
 
-					{businessRegistrationType && (
+					{signupFormData.businessRegistrationType && (
 						<div
 							style={{
 								backgroundColor: "#f3f4f6",
@@ -279,7 +328,7 @@ const SignupForm: React.FC = () => {
 								marginTop: "0.5rem",
 								width: "100%",
 							}}>
-							{businessRegistrationType === "Sole Proprietor" ? (
+							{signupFormData.businessRegistrationType === "Sole Proprietor" ? (
 								<p>
 									You are a sole proprietor. Your name might be John Smith, and you advertise your business as ABC
 									Framing. In this case, your legal business name is John Smith and your operating name is ABC Framing.
@@ -298,8 +347,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Legal business name (required)"
 						type="text"
-						value={legalName}
-						onChange={(e) => setLegalName(e.target.value)}
+						name="legalName"
+						value={signupFormData.legalName}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Legal business name (required)"
 					/>
@@ -317,19 +367,21 @@ const SignupForm: React.FC = () => {
 						data-testid="My company has an operating name or trade name"
 						className="rounded-sm border-[1.5px] bg-white focus:ring-0 focus:ring-offset-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-0 text-black focus-visible:outline-gray-900 border-gray-500 hover:cursor-pointer hover:border-gray-800 h-4 w-4"
 						type="checkbox"
-						checked={hasTradeName}
-						onChange={(e) => setHasTradeName(e.target.checked)}
+						name="hasTradeName"
+						checked={signupFormData.hasTradeName}
+						onChange={handleChange}
 					/>
 					<span>My company has an operating name or trade name.</span>
 				</label>
 
-				{hasTradeName && (
+				{signupFormData.hasTradeName && (
 					<div className="TextInput relative w-full max-w-full">
 						<input
 							id="Operating name"
 							type="text"
-							value={operatingName}
-							onChange={(e) => setOperatingName(e.target.value)}
+							name="operatingName"
+							value={signupFormData.operatingName}
+							onChange={handleChange}
 							className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 							placeholder="Operating name"
 						/>
@@ -345,8 +397,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Business number"
 						type="number"
-						value={businessNumber}
-						onChange={(e) => setBusinessNumber(e.target.value)}
+						name="businessNumber"
+						value={signupFormData.businessNumber}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Business number"
 					/>
@@ -363,8 +416,9 @@ const SignupForm: React.FC = () => {
 					</label>
 					<select
 						id="company-type-select"
-						value={companyType}
-						onChange={(e) => setCompanyType(e.target.value)}
+						value={signupFormData.companyType}
+						name="companyType"
+						onChange={handleChange}
 						className="block w-full h-full cursor-pointer border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm text-gray-900 focus:border-gray-900 focus:outline-none">
 						<option value="">Select...</option>
 						<option value="Retail">Retail</option>
@@ -391,8 +445,9 @@ const SignupForm: React.FC = () => {
 					</label>
 					<select
 						id="industry-select"
-						value={industry}
-						onChange={(e) => setIndustry(e.target.value)}
+						value={signupFormData.industry}
+						name="industry"
+						onChange={handleChange}
 						className="block w-full h-full cursor-pointer border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm text-gray-900 focus:border-gray-900 focus:outline-none">
 						<option value="">Select...</option>
 						<option value="Software as a service">Software as a service</option>
@@ -414,8 +469,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Website"
 						type="text"
-						value={website}
-						onChange={(e) => setWebsite(e.target.value)}
+						name="website"
+						value={signupFormData.website}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Website"
 					/>
@@ -429,8 +485,9 @@ const SignupForm: React.FC = () => {
 					<input
 						id="Phone"
 						type="number"
-						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
+						name="phone"
+						value={signupFormData.phone}
+						onChange={handleChange}
 						className="z-10 block w-full appearance-none rounded-lg border border-gray-300 bg-white px-[15px] pb-2.5 pt-4 peer placeholder:text-transparent focus:border-gray-900 focus:pb-2.5 focus:pt-4 focus:outline-none focus:ring-0 overflow-ellipsis text-sm text-gray-900 autofill:text-sm autofill:text-gray-900"
 						placeholder="Phone number"
 					/>
@@ -462,8 +519,9 @@ const SignupForm: React.FC = () => {
 							},
 							{ id: "justCheckingItOut", value: "Just checking it out", label: "Just checking it out" },
 						]}
-						selectedValue={expectedActivity}
-						onChange={setExpectedActivity}
+						name="expectedActivity"
+						selectedValue={signupFormData.expectedActivity}
+						onChange={handleChange}
 					/>
 				</div>
 				{errors.expectedActivity && <div className="text-sm text-red-500">{errors.expectedActivity}</div>}

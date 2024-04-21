@@ -11,15 +11,15 @@ interface RadioOption {
 	label: string;
 }
 
-interface RadioWithTickMarkProps {
+interface RadioWithTickMarkProps extends React.InputHTMLAttributes<HTMLInputElement> {
 	options: RadioOption[];
 	selectedValue: string;
-	onChange: (value: string) => void;
+	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const RadioWithTickMark: React.FC<RadioWithTickMarkProps> = ({ options, selectedValue, onChange }) => {
-	const handleChange = (value: string) => {
-		onChange(value);
+const RadioWithTickMark = ({ options, selectedValue, name, onChange }: RadioWithTickMarkProps) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		onChange(e);
 	};
 
 	return (
@@ -33,9 +33,10 @@ const RadioWithTickMark: React.FC<RadioWithTickMarkProps> = ({ options, selected
 							id={option.id}
 							type="radio"
 							className="hidden"
+							name={name}
 							value={option.value}
 							checked={selectedValue === option.value}
-							onChange={() => handleChange(option.value)}
+							onChange={handleChange}
 						/>
 						<label
 							htmlFor={option.id}

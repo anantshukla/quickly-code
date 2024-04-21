@@ -4,6 +4,10 @@
 */
 
 export interface APIErrorFailureDTO {
-	message: string;
-	isSuccessful: boolean;
+	response: {
+		data: {
+			message: string;
+			isSuccessful: boolean;
+		};
+	};
 }
